@@ -6,35 +6,21 @@ import type { Achievement, DailyScore, Habit, HabitCompletion, JournalEntry, Wor
 import { useAuth } from "../auth/AuthProvider";
 
 export type DashboardData = {
-  habits: Habit[];
-  completions: HabitCompletion[];
   workouts: Workout[];
   journal: JournalEntry | null;
   score: DailyScore;
   achievements: Achievement[];
 };
 
-export function useDashboard(date = toDateKey()) {
+export function useDashboard(date = toDateKey(), habits: Habit[], completions: HabitCompletion[]) {
   const { user } = useAuth();
 
   const { data, isLoading, error, refetch } = useQuery<DashboardData>({
     queryKey: ["dashboard", date, user?.id],
     queryFn: async () => {
       if (!user) throw new Error("No user");
-      const [habitsResult, completionsResult, workoutsResult, journalResult, scoreResult, achievementsResult] =
+      const [workoutsResult, journalResult, scoreResult, achievementsResult] =
         await Promise.all([
-          supabase
-            .from("habits")
-            .select("*")
-            .eq("user_id", user.id)
-            .eq("is_archived", false)
-            .order("sort_order", { ascending: true })
-            .order("created_at", { ascending: true }),
-          supabase
-            .from("habit_completions")
-            .select("*")
-            .eq("user_id", user.id)
-            .eq("completed_date", date),
           supabase
             .from("workouts")
             .select("*")
@@ -62,8 +48,6 @@ export function useDashboard(date = toDateKey()) {
         ]);
 
       const firstError =
-        habitsResult.error ||
-        completionsResult.error ||
         workoutsResult.error ||
         journalResult.error ||
         scoreResult.error ||
@@ -73,15 +57,11 @@ export function useDashboard(date = toDateKey()) {
         throw new Error(firstError.message);
       }
 
-      const habits = (habitsResult.data as Habit[]) ?? [];
-      const completions = (completionsResult.data as HabitCompletion[]) ?? [];
       const workouts = (workoutsResult.data as Workout[]) ?? [];
       const journal = (journalResult.data as JournalEntry) ?? null;
       const score = (scoreResult.data as DailyScore) ?? computeFallbackDailyScore(date, habits, completions, workouts, journal);
 
       return {
-        habits,
-        completions,
         workouts,
         journal,
         score,

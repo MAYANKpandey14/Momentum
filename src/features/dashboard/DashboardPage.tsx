@@ -15,10 +15,10 @@ import { useDashboard } from "./useDashboard";
 
 export function DashboardPage() {
   const today = toDateKey();
-  const { data, error, loading, reload } = useDashboard(today);
-  const { busyHabitId, completedToday, toggleHabit, createHabit } = useHabits();
+  const { busyHabitId, completedToday, toggleHabit, createHabit, habits, completions, loading: habitsLoading } = useHabits();
+  const { data, error, loading, reload } = useDashboard(today, habits, completions);
 
-  if (loading || !data) {
+  if (loading || habitsLoading || !data) {
     return <LoadingState />;
   }
 
@@ -67,7 +67,7 @@ export function DashboardPage() {
           }
           title="Today's habits"
         />
-        {data.habits.length === 0 ? (
+        {habits.length === 0 ? (
           <div className="rounded-2xl bg-white p-6 shadow-soft ring-1 ring-ink-950/10 text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-ink-100 text-ink-900 mb-4">
               <Sparkles className="h-6 w-6" />
@@ -116,7 +116,7 @@ export function DashboardPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {data.habits.slice(0, 4).map((habit) => (
+            {habits.slice(0, 4).map((habit) => (
               <HabitCard
                 busy={busyHabitId === habit.id}
                 completed={completedToday.has(habit.id)}
