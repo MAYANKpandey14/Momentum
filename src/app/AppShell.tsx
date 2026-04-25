@@ -1,7 +1,9 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { LogOut } from "lucide-react";
 import { BottomNav } from "../components/BottomNav";
 import { useAuth } from "../features/auth/AuthProvider";
+import { Modal } from "../components/Modal";
+import { Button } from "../components/Button";
 
 type AppShellProps = {
   children: ReactNode;
@@ -9,6 +11,7 @@ type AppShellProps = {
 
 export function AppShell({ children }: AppShellProps) {
   const { signOut } = useAuth();
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-paper-100 text-ink-800">
@@ -21,7 +24,7 @@ export function AppShell({ children }: AppShellProps) {
           <button
             aria-label="Sign out"
             className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-ink-600 shadow-sm ring-1 ring-ink-950/10 transition hover:text-ink-950"
-            onClick={signOut}
+            onClick={() => setIsLogoutModalOpen(true)}
             type="button"
           >
             <LogOut className="h-5 w-5" />
@@ -30,6 +33,29 @@ export function AppShell({ children }: AppShellProps) {
         {children}
       </div>
       <BottomNav />
+      <Modal
+        title="Sign Out"
+        open={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+      >
+        <p className="mb-6 text-ink-600">Are you sure you want to sign out of Momentum?</p>
+        <div className="flex gap-3">
+          <Button
+            className="flex-1"
+            onClick={() => setIsLogoutModalOpen(false)}
+            variant="secondary"
+          >
+            Cancel
+          </Button>
+          <Button
+            className="flex-1"
+            onClick={signOut}
+            variant="danger"
+          >
+            Sign out
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }
