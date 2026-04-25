@@ -1,4 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "sonner";
 import { AuthPage } from "../features/auth/AuthPage";
 import { AuthProvider, useAuth } from "../features/auth/AuthProvider";
 import { DashboardPage } from "../features/dashboard/DashboardPage";
@@ -7,6 +9,15 @@ import { JournalPage } from "../features/journal/JournalPage";
 import { ProgressPage } from "../features/progress/ProgressPage";
 import { WorkoutsPage } from "../features/workouts/WorkoutsPage";
 import { AppShell } from "./AppShell";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
 function ProtectedApp() {
   const { isConfigured, loading, session } = useAuth();
@@ -39,11 +50,14 @@ function ProtectedApp() {
 
 export function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <ProtectedApp />
-      </AuthProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AuthProvider>
+          <ProtectedApp />
+          <Toaster position="bottom-center" />
+        </AuthProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 

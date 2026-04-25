@@ -16,7 +16,7 @@ import { useDashboard } from "./useDashboard";
 export function DashboardPage() {
   const today = toDateKey();
   const { data, error, loading, reload } = useDashboard(today);
-  const { busyHabitId, completedToday, toggleHabit } = useHabits();
+  const { busyHabitId, completedToday, toggleHabit, createHabit } = useHabits();
 
   if (loading || !data) {
     return <LoadingState />;
@@ -68,16 +68,52 @@ export function DashboardPage() {
           title="Today's habits"
         />
         {data.habits.length === 0 ? (
-          <EmptyState
-            action={
+          <div className="rounded-2xl bg-white p-6 shadow-soft ring-1 ring-ink-950/10 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-ink-100 text-ink-900 mb-4">
+              <Sparkles className="h-6 w-6" />
+            </div>
+            <h3 className="text-lg font-semibold text-ink-950">Start a daily rhythm</h3>
+            <p className="mt-2 text-sm text-ink-600 mb-6">
+              One small repeatable action is enough to make the dashboard yours. Pick a template to start:
+            </p>
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="secondary"
+                className="w-full justify-start text-left"
+                onClick={async () => {
+                  await createHabit({ title: "Drink water", color: "#38bdf8", cadence: "daily" });
+                  await reload();
+                }}
+              >
+                💧 Drink water
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full justify-start text-left"
+                onClick={async () => {
+                  await createHabit({ title: "Read 10 pages", color: "#818cf8", cadence: "daily" });
+                  await reload();
+                }}
+              >
+                📖 Read 10 pages
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full justify-start text-left"
+                onClick={async () => {
+                  await createHabit({ title: "10 min walk", color: "#34d399", cadence: "daily" });
+                  await reload();
+                }}
+              >
+                🚶‍♂️ 10 min walk
+              </Button>
+            </div>
+            <div className="mt-6">
               <Link to="/habits">
-                <Button icon={<Plus className="h-4 w-4" />}>Add habit</Button>
+                <Button className="w-full" icon={<Plus className="h-4 w-4" />}>Create custom habit</Button>
               </Link>
-            }
-            copy="One small repeatable action is enough to make the dashboard yours."
-            icon={<Sparkles className="h-5 w-5" />}
-            title="Start a daily rhythm"
-          />
+            </div>
+          </div>
         ) : (
           <div className="space-y-2">
             {data.habits.slice(0, 4).map((habit) => (
@@ -88,7 +124,6 @@ export function DashboardPage() {
                 key={habit.id}
                 onToggle={async (completed) => {
                   await toggleHabit(habit, completed);
-                  await reload();
                 }}
               />
             ))}
@@ -98,10 +133,10 @@ export function DashboardPage() {
 
       <div className="grid grid-cols-1 gap-3">
         <motion.div
-          className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-ink-950/10"
+          className="rounded-xl bg-white shadow-sm ring-1 ring-ink-950/10 overflow-hidden"
           whileTap={{ scale: 0.99 }}
         >
-          <div className="flex items-center justify-between gap-3">
+          <Link aria-label="Open workouts" className="flex items-center justify-between gap-3 p-4" to="/workouts">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-sky-500/10 text-sky-500">
                 <Dumbbell className="h-5 w-5" />
@@ -113,17 +148,15 @@ export function DashboardPage() {
                 <p className="text-xs text-ink-600">+25 XP for showing up</p>
               </div>
             </div>
-            <Link aria-label="Open workouts" to="/workouts">
-              <ArrowRight className="h-5 w-5 text-ink-400" />
-            </Link>
-          </div>
+            <ArrowRight className="h-5 w-5 text-ink-400" />
+          </Link>
         </motion.div>
 
         <motion.div
-          className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-ink-950/10"
+          className="rounded-xl bg-white shadow-sm ring-1 ring-ink-950/10 overflow-hidden"
           whileTap={{ scale: 0.99 }}
         >
-          <div className="flex items-center justify-between gap-3">
+          <Link aria-label="Open journal" className="flex items-center justify-between gap-3 p-4" to="/journal">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-coral-400/20 text-coral-500">
                 <NotebookPen className="h-5 w-5" />
@@ -135,10 +168,8 @@ export function DashboardPage() {
                 <p className="text-xs text-ink-600">A few lines counts</p>
               </div>
             </div>
-            <Link aria-label="Open journal" to="/journal">
-              <ArrowRight className="h-5 w-5 text-ink-400" />
-            </Link>
-          </div>
+            <ArrowRight className="h-5 w-5 text-ink-400" />
+          </Link>
         </motion.div>
       </div>
 
